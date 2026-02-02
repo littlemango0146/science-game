@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>未來科學實驗室 - 生存挑戰</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>未來科學實驗室 - 極速版</title>
+    <!-- 移除了外部 Tailwind 腳本，改用內嵌 CSS 提升手機載入速度 -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;700&display=swap');
 
         :root {
             --neon-cyan: #00f3ff;
@@ -26,178 +26,150 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .tech-font {
-            font-family: 'Orbitron', sans-serif;
-        }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
 
-        /* 科技感玻璃面板 */
+        /* 玻璃面板優化 */
         .glass-container {
-            background: rgba(10, 11, 30, 0.8);
-            backdrop-filter: blur(15px);
+            background: rgba(15, 16, 35, 0.9);
             border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 24px;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 243, 255, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
             position: relative;
-            overflow: hidden;
+            width: 90vw;
+            max-width: 500px;
+            padding: 2rem;
+            box-sizing: border-box;
         }
 
-        /* 背景掃描線 */
+        /* 移除複雜的動畫以提升手機流暢度 */
         .glass-container::before {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(0, 243, 255, 0.1);
+            background: rgba(0, 243, 255, 0.15);
             animation: scan 4s linear infinite;
-            pointer-events: none;
         }
 
         @keyframes scan {
-            0% { top: -10%; }
-            100% { top: 110%; }
+            0% { top: 0%; } 100% { top: 100%; }
         }
 
+        /* 按鈕樣式 */
         .btn-choice {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.03);
+            display: block;
+            width: 100%;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(0, 243, 255, 0.2);
-            position: relative;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        .btn-choice:hover:not(:disabled) {
+        .btn-choice:active {
+            transform: scale(0.98);
             background: rgba(0, 243, 255, 0.1);
-            border-color: var(--neon-cyan);
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
         }
 
         .correct {
             border-color: var(--neon-green) !important;
-            background: rgba(57, 255, 20, 0.15) !important;
-            box-shadow: 0 0 20px rgba(57, 255, 20, 0.4) !important;
+            background: rgba(57, 255, 20, 0.1) !important;
             color: var(--neon-green);
         }
 
         .wrong {
             border-color: var(--neon-red) !important;
-            background: rgba(255, 49, 49, 0.15) !important;
-            box-shadow: 0 0 20px rgba(255, 49, 49, 0.4) !important;
+            background: rgba(255, 49, 49, 0.1) !important;
             color: var(--neon-red);
         }
 
-        /* 計時條 */
+        /* 計時器 */
         .timer-track {
             width: 100%;
-            height: 6px;
+            height: 4px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
+            margin: 1.5rem 0 0.5rem 0;
+            border-radius: 2px;
         }
 
         #timer-bar {
             width: 100%;
             height: 100%;
             background: var(--neon-cyan);
-            box-shadow: 0 0 10px var(--neon-cyan);
             transition: width 0.1s linear;
         }
 
-        /* 背景裝飾光 */
-        .ambient-light {
-            position: fixed;
-            width: 500px;
-            height: 500px;
-            filter: blur(150px);
-            opacity: 0.12;
-            z-index: -1;
-            border-radius: 50%;
-        }
-
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .text-center { text-align: center; }
         .hidden { display: none; }
+        
+        /* 輔助類 */
+        .label-sm { font-size: 0.7rem; color: rgba(0, 243, 255, 0.5); letter-spacing: 1px; }
+        .score-text { font-size: 1.5rem; color: #fff; font-weight: bold; }
+        .exit-btn { font-size: 0.7rem; color: #666; border: 1px solid #333; padding: 4px 8px; background: none; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="ambient-light" style="top: -100px; left: -100px; background: var(--neon-cyan);"></div>
-    <div class="ambient-light" style="bottom: -100px; right: -100px; background: var(--neon-purple);"></div>
 
-    <div id="game-app" class="w-full max-w-2xl px-4">
+    <div id="game-app">
         
         <!-- 首頁 -->
-        <div id="screen-home" class="glass-container p-10 text-center">
-            <h1 class="tech-font text-5xl md:text-6xl font-bold mb-2 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">
-                LAB SURVIVOR
-            </h1>
-            <p class="text-cyan-500/60 tech-font text-sm mb-12 tracking-widest">ADVANCED CHEMICAL SIMULATION v2.0</p>
+        <div id="screen-home" class="glass-container text-center">
+            <h1 class="tech-font" style="font-size: 2.5rem; margin-bottom: 0; color: var(--neon-cyan);">LAB</h1>
+            <h2 class="tech-font" style="font-size: 1.2rem; margin-bottom: 2rem; color: var(--neon-purple);">SURVIVOR</h2>
             
-            <div class="space-y-4">
-                <button onclick="initGame('acid-base')" class="w-full p-6 glass-container btn-choice group flex items-center justify-between">
-                    <span class="text-2xl">🧪</span>
-                    <div class="text-right">
-                        <div class="tech-font text-lg text-cyan-400">PH IDENTIFIER</div>
-                        <div class="text-xs text-gray-500">酸鹼性質辨識 (生活與化學品)</div>
-                    </div>
-                </button>
-                <button onclick="initGame('elements')" class="w-full p-6 glass-container btn-choice group flex items-center justify-between">
-                    <span class="text-2xl">⚛️</span>
-                    <div class="text-right">
-                        <div class="tech-font text-lg text-purple-400">ELEMENT SCAN</div>
-                        <div class="text-xs text-gray-500">1-18號元素 (符號轉中文)</div>
-                    </div>
-                </button>
-            </div>
+            <button onclick="initGame('acid-base')" class="btn-choice">
+                🧪 酸鹼性質辨識
+            </button>
+            <button onclick="initGame('elements')" class="btn-choice">
+                ⚛️ 元素符號(1-18)
+            </button>
             
-            <div class="mt-10 p-4 border border-red-900/30 bg-red-950/10 rounded-lg">
-                <p class="text-red-500 text-xs tech-font animate-pulse font-bold">
-                    SYSTEM LOG: WRONG ANSWER OR TIMEOUT = TERMINATION
-                </p>
-            </div>
+            <p style="color: #ff3131; font-size: 0.7rem; margin-top: 2rem; letter-spacing: 1px;" class="tech-font">
+                FAILURE = TERMINATION
+            </p>
         </div>
 
         <!-- 遊戲中 -->
-        <div id="screen-quiz" class="glass-container p-8 hidden">
-            <div class="flex justify-between items-center mb-6">
-                <button onclick="exitToHome()" class="tech-font text-[10px] border border-gray-700 px-3 py-1 hover:bg-white/5 transition-all text-gray-400">
-                    < BACK_TO_BASE
-                </button>
-                <div class="text-right">
-                    <div class="tech-font text-xs text-cyan-500">SCORE</div>
-                    <div id="ui-score" class="tech-font text-2xl text-white">000</div>
+        <div id="screen-quiz" class="glass-container hidden">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+                <button onclick="exitToHome()" class="exit-btn tech-font">EXIT</button>
+                <div style="text-align: right;">
+                    <div class="label-sm tech-font">SCORE</div>
+                    <div id="ui-score" class="score-text tech-font">000</div>
                 </div>
             </div>
 
-            <div class="text-center mb-4">
-                <span id="ui-q-count" class="tech-font text-[10px] bg-cyan-900/30 text-cyan-400 px-2 py-1 rounded">DATA_POINT: 1</span>
-            </div>
-
-            <div id="question-box" class="text-center py-8">
-                <h2 id="question-text" class="text-4xl md:text-5xl font-bold tracking-tight">---</h2>
-                <p class="text-gray-500 text-xs mt-4 tech-font tracking-widest">ANALYZING MOLECULAR STRUCTURE...</p>
+            <div class="text-center" style="margin-bottom: 2rem;">
+                <h3 id="question-text" style="font-size: 3rem; margin: 0;">---</h3>
+                <div class="label-sm tech-font" id="ui-q-count">POINT: 1</div>
             </div>
 
             <div class="timer-track">
                 <div id="timer-bar"></div>
             </div>
-            <div class="flex justify-between tech-font text-[10px] text-cyan-500/50 mb-8">
-                <span>STABILITY_TIMER</span>
-                <span id="timer-text">5.00s</span>
+            <div class="flex-between label-sm tech-font" style="margin-bottom: 1.5rem;">
+                <span>STABILITY</span>
+                <span id="timer-text">5.0s</span>
             </div>
 
-            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 選項動態生成 -->
-            </div>
+            <div id="options-container"></div>
         </div>
 
-        <!-- 結算介面 -->
-        <div id="screen-result" class="glass-container p-12 text-center hidden">
-            <div id="result-status-icon" class="text-6xl mb-6"></div>
-            <h2 id="result-title" class="tech-font text-3xl font-bold mb-2">RESULT</h2>
-            <div id="result-final-score" class="text-7xl font-bold tech-font text-cyan-400 mb-6">0</div>
-            <p id="result-msg" class="text-gray-400 mb-10 italic"></p>
-            <button onclick="exitToHome()" class="w-full py-4 glass-container btn-choice tech-font text-lg">
-                REINITIALIZE SYSTEM
-            </button>
+        <!-- 結算 -->
+        <div id="screen-result" class="glass-container text-center hidden">
+            <div id="result-icon" style="font-size: 4rem; margin-bottom: 1rem;"></div>
+            <h2 id="result-title" class="tech-font" style="font-size: 1.5rem;">MISSION END</h2>
+            <div id="result-final-score" class="tech-font" style="font-size: 4rem; color: var(--neon-cyan); margin: 1rem 0;">0</div>
+            <p id="result-msg" style="color: #888; margin-bottom: 2rem; font-size: 0.9rem;"></p>
+            <button onclick="exitToHome()" class="btn-choice tech-font">REBOOT</button>
         </div>
 
     </div>
@@ -220,47 +192,30 @@
             { q: "S", a: "硫" }, { q: "Cl", a: "氯" }, { q: "Ar", a: "氬" }
         ];
 
-        let state = {
-            mode: '',
-            questions: [],
-            currentIdx: 0,
-            score: 0,
-            timeLeft: 5.0,
-            timerId: null,
-            isAnswering: false
-        };
+        let state = { mode: '', questions: [], currentIdx: 0, score: 0, timeLeft: 5.0, timerId: null, isAnswering: false };
 
-        const screens = {
-            home: document.getElementById('screen-home'),
-            quiz: document.getElementById('screen-quiz'),
-            result: document.getElementById('screen-result')
-        };
-
-        function showScreen(id) {
-            Object.values(screens).forEach(s => s.classList.add('hidden'));
-            screens[id].classList.remove('hidden');
-        }
+        const scrHome = document.getElementById('screen-home');
+        const scrQuiz = document.getElementById('screen-quiz');
+        const scrResult = document.getElementById('screen-result');
 
         function initGame(mode) {
             state.mode = mode;
             state.score = 0;
             state.currentIdx = 0;
-            state.isAnswering = false;
-            
             let pool = mode === 'acid-base' ? [...acidBaseData] : [...elementsData];
             state.questions = pool.sort(() => Math.random() - 0.5);
-            
             document.getElementById('ui-score').innerText = "000";
-            showScreen('quiz');
+            scrHome.classList.add('hidden');
+            scrResult.classList.add('hidden');
+            scrQuiz.classList.remove('hidden');
             loadQuestion();
         }
 
         function loadQuestion() {
             if (state.currentIdx >= state.questions.length) {
-                endGame(true, "數據同步完成，你是完美的科學家！");
+                endGame(true, "數據同步成功。");
                 return;
             }
-
             state.isAnswering = false;
             const q = state.questions[state.currentIdx];
             document.getElementById('ui-q-count').innerText = `DATA_POINT: ${state.currentIdx + 1}`;
@@ -269,11 +224,8 @@
             const container = document.getElementById('options-container');
             container.innerHTML = '';
             
-            let choices = [];
-            if (state.mode === 'acid-base') {
-                choices = ["酸性", "鹼性"];
-            } else {
-                choices = [q.a];
+            let choices = state.mode === 'acid-base' ? ["酸性", "鹼性"] : [q.a];
+            if(state.mode !== 'acid-base') {
                 while(choices.length < 4) {
                     let r = elementsData[Math.floor(Math.random()*18)].a;
                     if(!choices.includes(r)) choices.push(r);
@@ -283,102 +235,62 @@
 
             choices.forEach(c => {
                 const btn = document.createElement('button');
-                btn.className = "p-5 glass-container btn-choice tech-font text-lg";
+                btn.className = "btn-choice";
                 btn.innerText = c;
                 btn.onclick = () => handleAnswer(c, btn);
                 container.appendChild(btn);
             });
-
             startTimer();
         }
 
         function startTimer() {
             clearInterval(state.timerId);
             state.timeLeft = 5.0;
-            updateTimerUI();
-            
-            const step = 0.05;
-            state.timerId = setInterval(() => {
-                state.timeLeft -= step;
-                if (state.timeLeft <= 0) {
-                    state.timeLeft = 0;
-                    updateTimerUI();
-                    clearInterval(state.timerId);
-                    endGame(false, "時間耗盡，核心反應堆過熱。");
-                }
-                updateTimerUI();
-            }, step * 1000);
-        }
-
-        function updateTimerUI() {
             const bar = document.getElementById('timer-bar');
-            const text = document.getElementById('timer-text');
-            const perc = (state.timeLeft / 5.0) * 100;
-            bar.style.width = `${perc}%`;
-            text.innerText = `${state.timeLeft.toFixed(2)}s`;
-            
-            if (state.timeLeft < 1.5) {
-                bar.style.background = "var(--neon-red)";
-                bar.style.boxShadow = "0 0 15px var(--neon-red)";
-            } else {
-                bar.style.background = "var(--neon-cyan)";
-                bar.style.boxShadow = "0 0 10px var(--neon-cyan)";
-            }
+            const txt = document.getElementById('timer-text');
+            state.timerId = setInterval(() => {
+                state.timeLeft -= 0.05;
+                const perc = (state.timeLeft / 5.0) * 100;
+                bar.style.width = perc + "%";
+                txt.innerText = Math.max(0, state.timeLeft).toFixed(1) + "s";
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timerId);
+                    endGame(false, "反應超時。");
+                }
+            }, 50);
         }
 
         function handleAnswer(choice, btn) {
             if (state.isAnswering) return;
             state.isAnswering = true;
             clearInterval(state.timerId);
-
             const correct = state.questions[state.currentIdx].a;
-            
             if (choice === correct) {
                 state.score += 10;
                 document.getElementById('ui-score').innerText = state.score.toString().padStart(3, '0');
                 btn.classList.add('correct');
-                
-                setTimeout(() => {
-                    state.currentIdx++;
-                    loadQuestion();
-                }, 600);
+                setTimeout(() => { state.currentIdx++; loadQuestion(); }, 500);
             } else {
                 btn.classList.add('wrong');
-                // 標記正確答案
-                Array.from(document.querySelectorAll('.btn-choice')).forEach(b => {
-                    if(b.innerText === correct) b.classList.add('correct');
-                });
-                
-                setTimeout(() => {
-                    endGame(false, `錯誤數據輸入：${choice}。正確應為：${correct}`);
-                }, 1000);
+                setTimeout(() => endGame(false, "錯誤數據：" + choice + "。應為：" + correct), 800);
             }
         }
 
         function endGame(success, msg) {
-            clearInterval(state.timerId);
-            showScreen('result');
-            
+            scrQuiz.classList.add('hidden');
+            scrResult.classList.remove('hidden');
             document.getElementById('result-final-score').innerText = state.score;
             document.getElementById('result-msg').innerText = msg;
-            
-            const title = document.getElementById('result-title');
-            const icon = document.getElementById('result-status-icon');
-            
-            if (success) {
-                title.innerText = "MISSION SUCCESS";
-                title.className = "tech-font text-3xl font-bold mb-2 text-green-400";
-                icon.innerText = "🏆";
-            } else {
-                title.innerText = "SYSTEM CRASHED";
-                title.className = "tech-font text-3xl font-bold mb-2 text-red-500";
-                icon.innerText = "⚠️";
-            }
+            document.getElementById('result-title').innerText = success ? "MISSION SUCCESS" : "SYSTEM FAILURE";
+            document.getElementById('result-title').style.color = success ? "var(--neon-green)" : "var(--neon-red)";
+            document.getElementById('result-icon').innerText = success ? "🏆" : "⚠️";
         }
 
         function exitToHome() {
-            if (state.timerId) clearInterval(state.timerId);
-            showScreen('home');
+            clearInterval(state.timerId);
+            scrQuiz.classList.add('hidden');
+            scrResult.classList.add('hidden');
+            scrHome.classList.remove('hidden');
         }
     </script>
 </body>
