@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未來科學實驗室 - 生存挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #39ff14;
+            --neon-red: #ff3131;
+            --bg-dark: #050614;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #e0e0e0;
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .tech-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 科技感玻璃面板 */
+        .glass-container {
+            background: rgba(10, 11, 30, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 243, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 背景掃描線 */
+        .glass-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 243, 255, 0.1);
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+
+        .btn-choice {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            position: relative;
+        }
+
+        .btn-choice:hover:not(:disabled) {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        }
+
+        .correct {
+            border-color: var(--neon-green) !important;
+            background: rgba(57, 255, 20, 0.15) !important;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.4) !important;
+            color: var(--neon-green);
+        }
+
+        .wrong {
+            border-color: var(--neon-red) !important;
+            background: rgba(255, 49, 49, 0.15) !important;
+            box-shadow: 0 0 20px rgba(255, 49, 49, 0.4) !important;
+            color: var(--neon-red);
+        }
+
+        /* 計時條 */
+        .timer-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: width 0.1s linear;
+        }
+
+        /* 背景裝飾光 */
+        .ambient-light {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            filter: blur(150px);
+            opacity: 0.12;
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="ambient-light" style="top: -100px; left: -100px; background: var(--neon-cyan);"></div>
+    <div class="ambient-light" style="bottom: -100px; right: -100px; background: var(--neon-purple);"></div>
+
+    <div id="game-app" class="w-full max-w-2xl px-4">
+        
+        <!-- 首頁 -->
+        <div id="screen-home" class="glass-container p-10 text-center">
+            <h1 class="tech-font text-5xl md:text-6xl font-bold mb-2 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">
+                LAB SURVIVOR
+            </h1>
+            <p class="text-cyan-500/60 tech-font text-sm mb-12 tracking-widest">ADVANCED CHEMICAL SIMULATION v2.0</p>
+            
+            <div class="space-y-4">
+                <button onclick="initGame('acid-base')" class="w-full p-6 glass-container btn-choice group flex items-center justify-between">
+                    <span class="text-2xl">🧪</span>
+                    <div class="text-right">
+                        <div class="tech-font text-lg text-cyan-400">PH IDENTIFIER</div>
+                        <div class="text-xs text-gray-500">酸鹼性質辨識 (生活與化學品)</div>
+                    </div>
+                </button>
+                <button onclick="initGame('elements')" class="w-full p-6 glass-container btn-choice group flex items-center justify-between">
+                    <span class="text-2xl">⚛️</span>
+                    <div class="text-right">
+                        <div class="tech-font text-lg text-purple-400">ELEMENT SCAN</div>
+                        <div class="text-xs text-gray-500">1-18號元素 (符號轉中文)</div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="mt-10 p-4 border border-red-900/30 bg-red-950/10 rounded-lg">
+                <p class="text-red-500 text-xs tech-font animate-pulse font-bold">
+                    SYSTEM LOG: WRONG ANSWER OR TIMEOUT = TERMINATION
+                </p>
+            </div>
+        </div>
+
+        <!-- 遊戲中 -->
+        <div id="screen-quiz" class="glass-container p-8 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="exitToHome()" class="tech-font text-[10px] border border-gray-700 px-3 py-1 hover:bg-white/5 transition-all text-gray-400">
+                    < BACK_TO_BASE
+                </button>
+                <div class="text-right">
+                    <div class="tech-font text-xs text-cyan-500">SCORE</div>
+                    <div id="ui-score" class="tech-font text-2xl text-white">000</div>
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <span id="ui-q-count" class="tech-font text-[10px] bg-cyan-900/30 text-cyan-400 px-2 py-1 rounded">DATA_POINT: 1</span>
+            </div>
+
+            <div id="question-box" class="text-center py-8">
+                <h2 id="question-text" class="text-4xl md:text-5xl font-bold tracking-tight">---</h2>
+                <p class="text-gray-500 text-xs mt-4 tech-font tracking-widest">ANALYZING MOLECULAR STRUCTURE...</p>
+            </div>
+
+            <div class="timer-track">
+                <div id="timer-bar"></div>
+            </div>
+            <div class="flex justify-between tech-font text-[10px] text-cyan-500/50 mb-8">
+                <span>STABILITY_TIMER</span>
+                <span id="timer-text">5.00s</span>
+            </div>
+
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 選項動態生成 -->
+            </div>
+        </div>
+
+        <!-- 結算介面 -->
+        <div id="screen-result" class="glass-container p-12 text-center hidden">
+            <div id="result-status-icon" class="text-6xl mb-6"></div>
+            <h2 id="result-title" class="tech-font text-3xl font-bold mb-2">RESULT</h2>
+            <div id="result-final-score" class="text-7xl font-bold tech-font text-cyan-400 mb-6">0</div>
+            <p id="result-msg" class="text-gray-400 mb-10 italic"></p>
+            <button onclick="exitToHome()" class="w-full py-4 glass-container btn-choice tech-font text-lg">
+                REINITIALIZE SYSTEM
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const acidBaseData = [
+            { q: "牙膏", a: "鹼性" }, { q: "小蘇打粉", a: "鹼性" },
+            { q: "氫氧化鈉", a: "鹼性" }, { q: "氫氧化鉀", a: "鹼性" },
+            { q: "氨水", a: "鹼性" }, { q: "油污清潔劑", a: "鹼性" },
+            { q: "鹽酸", a: "酸性" }, { q: "硝酸", a: "酸性" },
+            { q: "硫酸", a: "酸性" }, { q: "洗面奶", a: "酸性" }
+        ];
+
+        const elementsData = [
+            { q: "H", a: "氫" }, { q: "He", a: "氦" }, { q: "Li", a: "鋰" },
+            { q: "Be", a: "鈹" }, { q: "B", a: "硼" }, { q: "C", a: "碳" },
+            { q: "N", a: "氮" }, { q: "O", a: "氧" }, { q: "F", a: "氟" },
+            { q: "Ne", a: "氖" }, { q: "Na", a: "鈉" }, { q: "Mg", a: "鎂" },
+            { q: "Al", a: "鋁" }, { q: "Si", a: "矽" }, { q: "P", a: "磷" },
+            { q: "S", a: "硫" }, { q: "Cl", a: "氯" }, { q: "Ar", a: "氬" }
+        ];
+
+        let state = {
+            mode: '',
+            questions: [],
+            currentIdx: 0,
+            score: 0,
+            timeLeft: 5.0,
+            timerId: null,
+            isAnswering: false
+        };
+
+        const screens = {
+            home: document.getElementById('screen-home'),
+            quiz: document.getElementById('screen-quiz'),
+            result: document.getElementById('screen-result')
+        };
+
+        function showScreen(id) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            screens[id].classList.remove('hidden');
+        }
+
+        function initGame(mode) {
+            state.mode = mode;
+            state.score = 0;
+            state.currentIdx = 0;
+            state.isAnswering = false;
+            
+            let pool = mode === 'acid-base' ? [...acidBaseData] : [...elementsData];
+            state.questions = pool.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('ui-score').innerText = "000";
+            showScreen('quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (state.currentIdx >= state.questions.length) {
+                endGame(true, "數據同步完成，你是完美的科學家！");
+                return;
+            }
+
+            state.isAnswering = false;
+            const q = state.questions[state.currentIdx];
+            document.getElementById('ui-q-count').innerText = `DATA_POINT: ${state.currentIdx + 1}`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            let choices = [];
+            if (state.mode === 'acid-base') {
+                choices = ["酸性", "鹼性"];
+            } else {
+                choices = [q.a];
+                while(choices.length < 4) {
+                    let r = elementsData[Math.floor(Math.random()*18)].a;
+                    if(!choices.includes(r)) choices.push(r);
+                }
+                choices.sort(() => Math.random() - 0.5);
+            }
+
+            choices.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = "p-5 glass-container btn-choice tech-font text-lg";
+                btn.innerText = c;
+                btn.onclick = () => handleAnswer(c, btn);
+                container.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(state.timerId);
+            state.timeLeft = 5.0;
+            updateTimerUI();
+            
+            const step = 0.05;
+            state.timerId = setInterval(() => {
+                state.timeLeft -= step;
+                if (state.timeLeft <= 0) {
+                    state.timeLeft = 0;
+                    updateTimerUI();
+                    clearInterval(state.timerId);
+                    endGame(false, "時間耗盡，核心反應堆過熱。");
+                }
+                updateTimerUI();
+            }, step * 1000);
+        }
+
+        function updateTimerUI() {
+            const bar = document.getElementById('timer-bar');
+            const text = document.getElementById('timer-text');
+            const perc = (state.timeLeft / 5.0) * 100;
+            bar.style.width = `${perc}%`;
+            text.innerText = `${state.timeLeft.toFixed(2)}s`;
+            
+            if (state.timeLeft < 1.5) {
+                bar.style.background = "var(--neon-red)";
+                bar.style.boxShadow = "0 0 15px var(--neon-red)";
+            } else {
+                bar.style.background = "var(--neon-cyan)";
+                bar.style.boxShadow = "0 0 10px var(--neon-cyan)";
+            }
+        }
+
+        function handleAnswer(choice, btn) {
+            if (state.isAnswering) return;
+            state.isAnswering = true;
+            clearInterval(state.timerId);
+
+            const correct = state.questions[state.currentIdx].a;
+            
+            if (choice === correct) {
+                state.score += 10;
+                document.getElementById('ui-score').innerText = state.score.toString().padStart(3, '0');
+                btn.classList.add('correct');
+                
+                setTimeout(() => {
+                    state.currentIdx++;
+                    loadQuestion();
+                }, 600);
+            } else {
+                btn.classList.add('wrong');
+                // 標記正確答案
+                Array.from(document.querySelectorAll('.btn-choice')).forEach(b => {
+                    if(b.innerText === correct) b.classList.add('correct');
+                });
+                
+                setTimeout(() => {
+                    endGame(false, `錯誤數據輸入：${choice}。正確應為：${correct}`);
+                }, 1000);
+            }
+        }
+
+        function endGame(success, msg) {
+            clearInterval(state.timerId);
+            showScreen('result');
+            
+            document.getElementById('result-final-score').innerText = state.score;
+            document.getElementById('result-msg').innerText = msg;
+            
+            const title = document.getElementById('result-title');
+            const icon = document.getElementById('result-status-icon');
+            
+            if (success) {
+                title.innerText = "MISSION SUCCESS";
+                title.className = "tech-font text-3xl font-bold mb-2 text-green-400";
+                icon.innerText = "🏆";
+            } else {
+                title.innerText = "SYSTEM CRASHED";
+                title.className = "tech-font text-3xl font-bold mb-2 text-red-500";
+                icon.innerText = "⚠️";
+            }
+        }
+
+        function exitToHome() {
+            if (state.timerId) clearInterval(state.timerId);
+            showScreen('home');
+        }
+    </script>
+</body>
+</html>
